@@ -26,18 +26,18 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
 
-public class NfsClient implements AutoCloseable {
+public class Nfs4Client implements AutoCloseable {
 
-    private final NfsClientInternal nfsClient;
+    private final NfsClient4Internal nfsClient;
 
-    public NfsClient(@Nonnull String server, int port, @Nonnull String export) throws IOException {
+    public Nfs4Client(@Nonnull String server, int port, @Nonnull String export) throws IOException {
         System.out.println("Started the NFS4 Client ....");
 
         HostAndPort hp = HostAndPort.fromParts(server, port)
                 .requireBracketsForIPv6();
 
         InetSocketAddress serverAddress = new InetSocketAddress(hp.getHost(), hp.getPort());
-        this.nfsClient = new NfsClientInternal(serverAddress);
+        this.nfsClient = new NfsClient4Internal(serverAddress);
         this.nfsClient.mount(export);
     }
 

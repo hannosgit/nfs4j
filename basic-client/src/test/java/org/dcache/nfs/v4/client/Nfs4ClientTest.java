@@ -14,14 +14,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers
-class NfsClientTest {
+class Nfs4ClientTest {
 
     @Container
     private static final NfsServerTestcontainer<?> CONTAINER = new NfsServerTestcontainer<>("/nfsshare");
 
     @Test
     void mkdir() throws Exception {
-        try (NfsClient nfsClient = getNfsClientForTest()) {
+        try (Nfs4Client nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("bla");
 
             assertThatThrownBy(() -> nfsClient.mkDir("bla")).isInstanceOf(ExistException.class);
@@ -30,7 +30,7 @@ class NfsClientTest {
 
     @Test
     void readDir_empty() throws Exception {
-        try (NfsClient nfsClient = getNfsClientForTest()) {
+        try (Nfs4Client nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("aDir");
 
             final List<String> children = nfsClient.readDir("aDir");
@@ -40,7 +40,7 @@ class NfsClientTest {
 
     @Test
     void readDir_1child() throws Exception {
-        try (NfsClient nfsClient = getNfsClientForTest()) {
+        try (Nfs4Client nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("bDir");
             nfsClient.createFile("bDir/bla.txt");
 
@@ -49,11 +49,11 @@ class NfsClientTest {
         }
     }
 
-    private static NfsClient getNfsClientForTest() throws IOException {
+    private static Nfs4Client getNfsClientForTest() throws IOException {
         System.out.println(CONTAINER.getFirstMappedPort());
         System.out.println(CONTAINER.getHost());
 
-        return new NfsClient(CONTAINER.getHost(), CONTAINER.getFirstMappedPort(), CONTAINER.getExportPath());
+        return new Nfs4Client(CONTAINER.getHost(), CONTAINER.getFirstMappedPort(), CONTAINER.getExportPath());
     }
 
 }

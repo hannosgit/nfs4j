@@ -49,7 +49,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-class NfsClientInternal {
+class NfsClient4Internal {
 
     private final nfs4_prot_NFS4_PROGRAM_Client _nfsClient;
     private final Map<deviceid4, FileIoDevice> _knowDevices = new HashMap<>();
@@ -66,7 +66,7 @@ class NfsClientInternal {
     private boolean _isMDS = false;
     private boolean _isDS = false;
 
-    private final LoadingCache<InetSocketAddress, NfsClientInternal> _servers =
+    private final LoadingCache<InetSocketAddress, NfsClient4Internal> _servers =
             CacheBuilder.newBuilder().build(new Connector());
 
     /**
@@ -132,9 +132,9 @@ class NfsClientInternal {
 
     private static class LeaseUpdater implements Runnable {
 
-        private final NfsClientInternal _nfsClient;
+        private final NfsClient4Internal _nfsClient;
 
-        LeaseUpdater(NfsClientInternal nfsClient) {
+        LeaseUpdater(NfsClient4Internal nfsClient) {
             _nfsClient = nfsClient;
         }
 
@@ -151,7 +151,7 @@ class NfsClientInternal {
         }
     }
 
-    NfsClientInternal(InetSocketAddress address) throws OncRpcException,
+    NfsClient4Internal(InetSocketAddress address) throws OncRpcException,
             IOException {
         _nfsClient = new nfs4_prot_NFS4_PROGRAM_Client(address.getAddress(),
                 address.getPort(), IpProtocolType.TCP, 0, 0);
@@ -461,7 +461,7 @@ class NfsClientInternal {
             InetSocketAddress deviceAddr =
                     ioDevice.of(stripe.getPatternOffset(), stripe.getUnit(),
                             0, 4096, stripe.getFirstStripeIndex());
-            NfsClientInternal dsClient = _servers.getUnchecked(deviceAddr);
+            NfsClient4Internal dsClient = _servers.getUnchecked(deviceAddr);
 
             dsClient.nfsRead(stripe.getFh(), or.stateid());
 
@@ -534,7 +534,7 @@ class NfsClientInternal {
                     InetSocketAddress deviceAddr = ioDevice.of(
                             stripe.getPatternOffset(), stripe.getUnit(),
                             offset, data.length, stripe.getFirstStripeIndex());
-                    NfsClientInternal dsClient = _servers.getUnchecked(deviceAddr);
+                    NfsClient4Internal dsClient = _servers.getUnchecked(deviceAddr);
 
                     dsClient.nfsWrite(stripe.getFh(), data, offset, or.stateid());
                     offset += n;
@@ -968,12 +968,12 @@ class NfsClientInternal {
         }
     }
 
-    private static class Connector extends CacheLoader<InetSocketAddress, NfsClientInternal> {
+    private static class Connector extends CacheLoader<InetSocketAddress, NfsClient4Internal> {
 
         @Override
-        public NfsClientInternal load(InetSocketAddress f) {
+        public NfsClient4Internal load(InetSocketAddress f) {
             try {
-                NfsClientInternal client = new NfsClientInternal(f);
+                NfsClient4Internal client = new NfsClient4Internal(f);
                 client.dsMount();
                 return client;
             } catch (Exception e) {
