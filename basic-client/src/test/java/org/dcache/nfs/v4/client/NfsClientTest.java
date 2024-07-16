@@ -8,6 +8,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import testutil.NfsServerTestcontainer;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,7 +34,7 @@ class NfsClientTest {
             nfsClient.mkDir("aDir");
 
 
-            final String[] children = nfsClient.readDir("aDir");
+            final List<String> children = nfsClient.readDir("aDir");
             assertThat(children).isEmpty();
         }
     }

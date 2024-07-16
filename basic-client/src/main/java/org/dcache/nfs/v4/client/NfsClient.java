@@ -94,7 +94,7 @@ public class NfsClient implements AutoCloseable {
         this.nfsClient.mkdir(path);
     }
 
-    public String[] readDir(String path) throws IOException {
+    public List<String> readDir(String path) throws IOException {
         return this.nfsClient.readdir(path);
     }
 
@@ -336,7 +336,7 @@ public class NfsClient implements AutoCloseable {
         }
     }
 
-    private String[] readdir(String path) throws OncRpcException, IOException {
+    private List<String> readdir(String path) throws IOException {
         return list(_cwd, path);
     }
 
@@ -372,13 +372,12 @@ public class NfsClient implements AutoCloseable {
         return list.toArray(new String[list.size()]);
     }
 
-    private String[] list(nfs_fh4 fh, String path) throws OncRpcException, IOException, ChimeraNFSException {
+    private List<String> list(nfs_fh4 fh, String path) throws IOException {
+        final List<String> result = new ArrayList<>();
 
         boolean done;
-        List<String> list = new ArrayList<>();
         long cookie = 0;
         verifier4 verifier = new verifier4(new byte[nfs4_prot.NFS4_VERIFIER_SIZE]);
-
         do {
 
             COMPOUND4args args = new CompoundBuilder()
@@ -396,13 +395,13 @@ public class NfsClient implements AutoCloseable {
             entry4 dirEntry = compound4res.resarray.get(compound4res.resarray.size() - 1).opreaddir.resok4.reply.entries;
             while (dirEntry != null) {
                 cookie = dirEntry.cookie.value;
-                list.add(new String(dirEntry.name.value));
+                result.add(new String(dirEntry.name.value));
                 dirEntry = dirEntry.nextentry;
             }
 
         } while (!done);
 
-        return list.toArray(new String[list.size()]);
+        return result;
     }
 
     private void mkdir(String path) throws OncRpcException, IOException {
