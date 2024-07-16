@@ -49,11 +49,11 @@ class NfsClientTest {
         }
     }
 
-    private static NfsClient getNfsClientForTest() throws IOException, InterruptedException {
+    private static NfsClient getNfsClientForTest() throws IOException {
         System.out.println(CONTAINER.getFirstMappedPort());
         System.out.println(CONTAINER.getHost());
 
-        return new NfsClient(CONTAINER.getFirstMappedPort(), NfsVersion.V4, CONTAINER.getHost(), CONTAINER.getExportPath());
+        return new NfsClient(CONTAINER.getHost(), CONTAINER.getFirstMappedPort(), CONTAINER.getExportPath());
     }
 
 }

@@ -21,7 +21,6 @@ package org.dcache.nfs.v4.client;
 
 import com.google.common.net.HostAndPort;
 import jakarta.annotation.Nonnull;
-import org.dcache.oncrpc4j.rpc.OncRpcException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -31,7 +30,7 @@ public class NfsClient implements AutoCloseable {
 
     private final NfsClientInternal nfsClient;
 
-    public NfsClient(int port, @Nonnull NfsVersion nfsVersion, @Nonnull String server, @Nonnull String export) throws IOException, OncRpcException, InterruptedException {
+    public NfsClient(@Nonnull String server, int port, @Nonnull String export) throws IOException {
         System.out.println("Started the NFS4 Client ....");
 
         HostAndPort hp = HostAndPort.fromParts(server, port)

@@ -21,9 +21,6 @@ package org.dcache.nfs.v4.client;
 import java.io.IOException;
 
 import java.net.InetAddress;
-import java.util.Arrays;
-
-import com.sun.security.auth.module.UnixSystem;
 
 import org.dcache.nfs.v4.xdr.COMPOUND4args;
 import org.dcache.nfs.v4.xdr.COMPOUND4res;
@@ -34,7 +31,6 @@ import org.dcache.oncrpc4j.rpc.RpcAuth;
 import org.dcache.oncrpc4j.rpc.RpcAuthTypeUnix;
 import org.dcache.oncrpc4j.rpc.RpcCall;
 import org.dcache.oncrpc4j.rpc.RpcTransport;
-import org.dcache.oncrpc4j.xdr.XdrVoid;
 
 /**
  * The class <code>nfs4_prot_NFS4_PROGRAM_Client</code> implements the client stub proxy
@@ -50,49 +46,6 @@ public class nfs4_prot_NFS4_PROGRAM_Client {
      * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
      * from which the NFS4_PROGRAM remote program can be accessed.
      * @param host Internet address of host where to contact the remote program.
-     * @param protocol {@link org.acplt.oncrpc.OncRpcProtocols Protocol} to be
-     *   used for ONC/RPC calls.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int protocol)
-           throws OncRpcException, IOException {
-           this(host, 2049, protocol);
-    }
-
-    /**
-     * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
-     * from which the NFS4_PROGRAM remote program can be accessed.
-     * @param host Internet address of host where to contact the remote program.
-     * @param port Port number at host where the remote program can be reached.
-     * @param protocol {@link org.acplt.oncrpc.OncRpcProtocols Protocol} to be
-     *   used for ONC/RPC calls.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int port, int protocol)
-           throws OncRpcException, IOException {
-
-        UnixSystem currentUser = new UnixSystem();
-
-        int uid = (int)currentUser.getUid();
-        int gid = (int)currentUser.getGid();
-        int[] gids = Arrays.stream(currentUser.getGroups()).mapToInt(Math::toIntExact).toArray();
-
-        rpcClient = new OncRpcClient(host, protocol, port);
-        RpcTransport transport;
-        transport = rpcClient.connect();
-
-        RpcAuth credential = new RpcAuthTypeUnix(uid, gid, gids,
-            (int) (System.currentTimeMillis() / 1000),
-            InetAddress.getLocalHost().getHostName());
-        client = new RpcCall(100003, 4, credential, transport);
-    }
-
-    /**
-     * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
-     * from which the NFS4_PROGRAM remote program can be accessed.
-     * @param host Internet address of host where to contact the remote program.
      * @param port Port number at host where the remote program can be reached.
      * @param protocol {@link org.acplt.oncrpc.OncRpcProtocols Protocol} to be
      *   used for ONC/RPC calls.
@@ -101,8 +54,7 @@ public class nfs4_prot_NFS4_PROGRAM_Client {
      * @throws OncRpcException if an ONC/RPC error occurs.
      * @throws IOException if an I/O error occurs.
      */
-    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int port, int protocol, int uid, int gid)
-            throws OncRpcException, IOException {
+    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int port, int protocol, int uid, int gid) throws  IOException {
         rpcClient = new OncRpcClient(host, protocol, port);
         RpcTransport transport;
         transport = rpcClient.connect();
@@ -111,65 +63,6 @@ public class nfs4_prot_NFS4_PROGRAM_Client {
                 (int) (System.currentTimeMillis() / 1000),
                 InetAddress.getLocalHost().getHostName());
         client = new RpcCall(100003, 4, credential, transport);
-    }
-
-    /**
-     * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
-     * from which the NFS4_PROGRAM remote program can be accessed.
-     * @param client ONC/RPC client connection object implementing a particular
-     *   protocol.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-//    public nfs4_prot_NFS4_PROGRAM_Client(OncRpcClient client)
-//           throws OncRpcException, IOException {
-//        super(client);
-//    }
-
-    /**
-     * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
-     * from which the NFS4_PROGRAM remote program can be accessed.
-     * @param host Internet address of host where to contact the remote program.
-     * @param program Remote program number.
-     * @param version Remote program version number.
-     * @param protocol {@link org.acplt.oncrpc.OncRpcProtocols Protocol} to be
-     *   used for ONC/RPC calls.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-//    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int program, int version, int protocol)
-//           throws OncRpcException, IOException {
-//        super(host, program, version, 0, protocol);
-//    }
-
-    /**
-     * Constructs a <code>nfs4_prot_NFS4_PROGRAM_Client</code> client stub proxy object
-     * from which the NFS4_PROGRAM remote program can be accessed.
-     * @param host Internet address of host where to contact the remote program.
-     * @param program Remote program number.
-     * @param version Remote program version number.
-     * @param port Port number at host where the remote program can be reached.
-     * @param protocol {@link org.acplt.oncrpc.OncRpcProtocols Protocol} to be
-     *   used for ONC/RPC calls.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-//    public nfs4_prot_NFS4_PROGRAM_Client(InetAddress host, int program, int version, int port, int protocol)
-//           throws OncRpcException, IOException {
-//        super(host, program, version, port, protocol);
-//    }
-
-    /**
-     * Call remote procedure NFSPROC4_NULL_4.
-     * @throws OncRpcException if an ONC/RPC error occurs.
-     * @throws IOException if an I/O error occurs.
-     */
-    public void NFSPROC4_NULL_4()
-           throws OncRpcException, IOException {
-        XdrVoid args$ = XdrVoid.XDR_VOID;
-        XdrVoid result$ = XdrVoid.XDR_VOID;
-
-        client.call(nfs4_prot.NFSPROC4_NULL_4, args$, result$);
     }
 
     /**
@@ -188,12 +81,7 @@ public class nfs4_prot_NFS4_PROGRAM_Client {
         return result$;
     }
 
-    public RpcTransport getTransport() {
-        return client.getTransport();
-    }
-
     public void close() throws IOException {
         rpcClient.close();
     }
 }
-// End of nfs4_prot_NFS4_PROGRAM_Client.java
