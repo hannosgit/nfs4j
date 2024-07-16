@@ -33,9 +33,19 @@ class NfsClientTest {
         try (NfsClient nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("aDir");
 
-
             final List<String> children = nfsClient.readDir("aDir");
             assertThat(children).isEmpty();
+        }
+    }
+
+    @Test
+    void readDir_1child() throws Exception {
+        try (NfsClient nfsClient = getNfsClientForTest()) {
+            nfsClient.mkDir("aDir");
+            nfsClient.createFile("aDir/bla.txt");
+
+            final List<String> children = nfsClient.readDir("aDir");
+            assertThat(children).hasSize(1);
         }
     }
 

@@ -98,6 +98,13 @@ public class NfsClient implements AutoCloseable {
         return this.nfsClient.readdir(path);
     }
 
+    public void createFile(String path) throws IOException {
+        OpenReply or = this.nfsClient.create(path);
+
+        this.nfsClient.nfsWrite(or.fh(), "hello world".getBytes(), 0, or.stateid());
+        this.nfsClient.close(or.fh(), or.stateid());
+    }
+
     @Override
     public void close() throws Exception {
         if (nfsClient != null) {
@@ -328,12 +335,6 @@ public class NfsClient implements AutoCloseable {
         _rootFh = compound4res.resarray.get(compound4res.resarray.size() - 1).opgetfh.resok4.object;
         _cwd = _rootFh;
         System.out.println("root fh = " + BaseEncoding.base16().lowerCase().encode(_rootFh.value));
-    }
-
-    private void readdir() throws OncRpcException, IOException {
-        for (String entry : list(_cwd)) {
-            System.out.println(entry);
-        }
     }
 
     private List<String> readdir(String path) throws IOException {
