@@ -38,17 +38,9 @@ import org.dcache.nfs.v4.xdr.*;
 import org.dcache.nfs.vfs.Stat;
 import org.dcache.oncrpc4j.rpc.OncRpcException;
 import org.dcache.oncrpc4j.rpc.net.IpProtocolType;
-import org.jline.reader.EndOfFileException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.UserInterruptException;
-import org.jline.reader.impl.completer.StringsCompleter;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -100,6 +92,10 @@ public class NfsClient implements AutoCloseable {
 
     public void mkDir(String path) throws IOException {
         this.nfsClient.mkdir(path);
+    }
+
+    public String[] readDir(String path) throws IOException {
+        return this.nfsClient.readdir(path);
     }
 
     @Override
@@ -182,7 +178,7 @@ public class NfsClient implements AutoCloseable {
         }
     }
 
-    public NfsClient(InetSocketAddress address) throws OncRpcException,
+    private NfsClient(InetSocketAddress address) throws OncRpcException,
             IOException {
         _nfsClient = new nfs4_prot_NFS4_PROGRAM_Client(address.getAddress(),
                 address.getPort(), IpProtocolType.TCP, 0, 0);
@@ -190,7 +186,7 @@ public class NfsClient implements AutoCloseable {
         _servers.asMap().put(address, this);
     }
 
-    public void mount(String root) throws OncRpcException, IOException {
+    private void mount(String root) throws OncRpcException, IOException {
         exchange_id();
         create_session();
 
@@ -204,13 +200,13 @@ public class NfsClient implements AutoCloseable {
         _lastUpdate = System.currentTimeMillis();
     }
 
-    public void dsMount() throws OncRpcException, IOException {
+    private void dsMount() throws OncRpcException, IOException {
         exchange_id();
         create_session();
         _lastUpdate = System.currentTimeMillis();
     }
 
-    public void umount() throws OncRpcException, IOException {
+    private void umount() throws OncRpcException, IOException {
         destroy_session();
         destroy_clientid();
     }
@@ -334,19 +330,17 @@ public class NfsClient implements AutoCloseable {
         System.out.println("root fh = " + BaseEncoding.base16().lowerCase().encode(_rootFh.value));
     }
 
-    public void readdir() throws OncRpcException, IOException {
+    private void readdir() throws OncRpcException, IOException {
         for (String entry : list(_cwd)) {
             System.out.println(entry);
         }
     }
 
-    public void readdir(String path) throws OncRpcException, IOException {
-        for (String entry : list(_cwd, path)) {
-            System.out.println(entry);
-        }
+    private String[] readdir(String path) throws OncRpcException, IOException {
+        return list(_cwd, path);
     }
 
-    public String[] list(nfs_fh4 fh) throws OncRpcException, IOException, ChimeraNFSException {
+    private String[] list(nfs_fh4 fh) throws OncRpcException, IOException, ChimeraNFSException {
 
         boolean done;
         List<String> list = new ArrayList<>();
@@ -378,7 +372,7 @@ public class NfsClient implements AutoCloseable {
         return list.toArray(new String[list.size()]);
     }
 
-    public String[] list(nfs_fh4 fh, String path) throws OncRpcException, IOException, ChimeraNFSException {
+    private String[] list(nfs_fh4 fh, String path) throws OncRpcException, IOException, ChimeraNFSException {
 
         boolean done;
         List<String> list = new ArrayList<>();
@@ -448,7 +442,7 @@ public class NfsClient implements AutoCloseable {
         }
     }
 
-    nfs_fh4 cwd(String path) throws OncRpcException, IOException {
+    private nfs_fh4 cwd(String path) throws OncRpcException, IOException {
 
         COMPOUND4args args = new CompoundBuilder()
                 .withPutfh(path.charAt(0) == '/' ? _rootFh : _cwd)
@@ -463,7 +457,7 @@ public class NfsClient implements AutoCloseable {
         return new nfs_fh4(_cwd.value);
     }
 
-    public Stat stat(nfs_fh4 fh) throws OncRpcException, IOException {
+    private Stat stat(nfs_fh4 fh) throws OncRpcException, IOException {
 
         Stat stat = new Stat();
 
@@ -947,7 +941,7 @@ public class NfsClient implements AutoCloseable {
         COMPOUND4res compound4res = sendCompoundInSession(args);
     }
 
-    public void remove(String path) throws OncRpcException, IOException {
+    private void remove(String path) throws OncRpcException, IOException {
 
         COMPOUND4args args = new CompoundBuilder()
                 .withPutfh(_cwd)

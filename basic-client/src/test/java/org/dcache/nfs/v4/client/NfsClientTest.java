@@ -9,6 +9,7 @@ import testutil.NfsServerTestcontainer;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers
@@ -18,11 +19,22 @@ class NfsClientTest {
     private static final NfsServerTestcontainer<?> CONTAINER = new NfsServerTestcontainer<>("/nfsshare");
 
     @Test
-    void test_readDir() throws Exception {
+    void mkdir() throws Exception {
         try (NfsClient nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("bla");
 
             assertThatThrownBy(() -> nfsClient.mkDir("bla")).isInstanceOf(ExistException.class);
+        }
+    }
+
+    @Test
+    void readDir_empty() throws Exception {
+        try (NfsClient nfsClient = getNfsClientForTest()) {
+            nfsClient.mkDir("aDir");
+
+
+            final String[] children = nfsClient.readDir("aDir");
+            assertThat(children).isEmpty();
         }
     }
 
