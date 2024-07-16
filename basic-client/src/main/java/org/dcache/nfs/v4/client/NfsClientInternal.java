@@ -66,6 +66,9 @@ class NfsClientInternal {
     private boolean _isMDS = false;
     private boolean _isDS = false;
 
+    private final LoadingCache<InetSocketAddress, NfsClientInternal> _servers =
+            CacheBuilder.newBuilder().build(new Connector());
+
     /**
      * pNFS layout type that client supports.
      * <p>
@@ -964,28 +967,6 @@ class NfsClientInternal {
             System.out.println("mode: 0" + Integer.toOctalString(mode.get().value));
         }
     }
-
-    static class OpenReply {
-
-        private final nfs_fh4 _fh;
-        private final stateid4 _stateid;
-
-        private OpenReply(nfs_fh4 fh, stateid4 stateid) {
-            _stateid = stateid;
-            _fh = fh;
-        }
-
-        nfs_fh4 fh() {
-            return _fh;
-        }
-
-        stateid4 stateid() {
-            return _stateid;
-        }
-    }
-
-    private final LoadingCache<InetSocketAddress, NfsClientInternal> _servers =
-            CacheBuilder.newBuilder().build(new Connector());
 
     private static class Connector extends CacheLoader<InetSocketAddress, NfsClientInternal> {
 

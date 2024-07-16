@@ -51,7 +51,7 @@ public class NfsClient implements AutoCloseable {
     }
 
     public void createFile(String path) throws IOException {
-        NfsClientInternal.OpenReply or = this.nfsClient.create(path);
+        OpenReply or = this.nfsClient.create(path);
 
         this.nfsClient.nfsWrite(or.fh(), "hello world".getBytes(), 0, or.stateid());
         this.nfsClient.close(or.fh(), or.stateid());
