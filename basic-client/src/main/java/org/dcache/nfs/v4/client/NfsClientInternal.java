@@ -49,10 +49,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-class NfsClientInternal implements AutoCloseable {
+class NfsClientInternal {
 
-    private NfsClientInternal nfsClient;
-    private nfs4_prot_NFS4_PROGRAM_Client _nfsClient;
+    private final nfs4_prot_NFS4_PROGRAM_Client _nfsClient;
     private final Map<deviceid4, FileIoDevice> _knowDevices = new HashMap<>();
     private nfs_fh4 _cwd = null;
     private nfs_fh4 _rootFh = null;
@@ -66,7 +65,6 @@ class NfsClientInternal implements AutoCloseable {
 
     private boolean _isMDS = false;
     private boolean _isDS = false;
-    private static final String PROMPT = "NFSv41: ";
 
     /**
      * pNFS layout type that client supports.
@@ -76,28 +74,6 @@ class NfsClientInternal implements AutoCloseable {
     private final layouttype4 clientLayoutType = layouttype4.LAYOUT4_NFSV4_1_FILES;
 
     private final ScheduledExecutorService _executorService = Executors.newScheduledThreadPool(1);
-
-    public void mkDir(String path) throws IOException {
-        this.nfsClient.mkdir(path);
-    }
-
-    public List<String> readDir(String path) throws IOException {
-        return this.nfsClient.readdir(path);
-    }
-
-    public void createFile(String path) throws IOException {
-        OpenReply or = this.nfsClient.create(path);
-
-        this.nfsClient.nfsWrite(or.fh(), "hello world".getBytes(), 0, or.stateid());
-        this.nfsClient.close(or.fh(), or.stateid());
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (nfsClient != null) {
-            nfsClient.umount();
-        }
-    }
 
     /**
      * generate set of files and delete them after words
