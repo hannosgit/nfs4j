@@ -305,7 +305,7 @@ class NfsClient4Internal {
         System.out.println("root fh = " + BaseEncoding.base16().lowerCase().encode(_rootFh.value));
     }
 
-    List<String> readdir(String path) throws IOException {
+    List<NfsDirectoryEntry> readdir(String path) throws IOException {
         return list(_cwd, path);
     }
 
@@ -341,8 +341,8 @@ class NfsClient4Internal {
         return list.toArray(new String[list.size()]);
     }
 
-    private List<String> list(nfs_fh4 fh, String path) throws IOException {
-        final List<String> result = new ArrayList<>();
+    private List<NfsDirectoryEntry> list(nfs_fh4 fh, String path) throws IOException {
+        final List<NfsDirectoryEntry> result = new ArrayList<>();
 
         boolean done;
         long cookie = 0;
@@ -364,8 +364,7 @@ class NfsClient4Internal {
             entry4 dirEntry = compound4res.resarray.get(compound4res.resarray.size() - 1).opreaddir.resok4.reply.entries;
             while (dirEntry != null) {
                 cookie = dirEntry.cookie.value;
-                result.add(new String(dirEntry.name.value));
-                System.out.println(Fattr4StandardAttributes.parse(dirEntry.attrs.attr_vals));
+                result.add(new NfsDirectoryEntry(new String(dirEntry.name.value),Fattr4StandardAttributes.parse(dirEntry.attrs.attr_vals)));
                 dirEntry = dirEntry.nextentry;
             }
 

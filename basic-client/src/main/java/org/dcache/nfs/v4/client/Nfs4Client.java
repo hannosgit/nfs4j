@@ -45,14 +45,14 @@ public class Nfs4Client implements AutoCloseable {
         this.nfsClient.mkdir(path);
     }
 
-    public List<String> readDir(String path) throws IOException {
+    public List<NfsDirectoryEntry> readDir(String path) throws IOException {
         return this.nfsClient.readdir(path);
     }
 
-    public void createFile(String path) throws IOException {
+    public void createFile(String path, String content) throws IOException {
         OpenReply or = this.nfsClient.create(path);
 
-        this.nfsClient.nfsWrite(or.fh(), "hello world".getBytes(), 0, or.stateid());
+        this.nfsClient.nfsWrite(or.fh(), content.getBytes(), 0, or.stateid());
         this.nfsClient.close(or.fh(), or.stateid());
     }
 

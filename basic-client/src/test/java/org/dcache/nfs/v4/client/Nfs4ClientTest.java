@@ -33,7 +33,7 @@ class Nfs4ClientTest {
         try (Nfs4Client nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("aDir");
 
-            final List<String> children = nfsClient.readDir("aDir");
+            final List<NfsDirectoryEntry> children = nfsClient.readDir("aDir");
             assertThat(children).isEmpty();
         }
     }
@@ -42,10 +42,11 @@ class Nfs4ClientTest {
     void readDir_1child() throws Exception {
         try (Nfs4Client nfsClient = getNfsClientForTest()) {
             nfsClient.mkDir("bDir");
-            nfsClient.createFile("bDir/bla.txt");
+            nfsClient.createFile("bDir/bla.txt", "hello world");
 
-            final List<String> children = nfsClient.readDir("bDir");
+            final List<NfsDirectoryEntry> children = nfsClient.readDir("bDir");
             assertThat(children).hasSize(1);
+            System.out.println(children);
         }
     }
 

@@ -44,7 +44,6 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         final int numLinks = getAnInt(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = 4;
         final int ownerLength = getAnInt(value, byteIndex, (byteIndex += byteOffset));
-        System.out.println(ownerLength);
         byteOffset = ownerLength;
         byteIndex += byteOffset;
 
@@ -53,7 +52,7 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         byteOffset = groupLength;
         byteIndex += byteOffset;
 
-        System.out.println(groupLength);
+
         byteOffset = 8;
         final long spaceUsed = getALong(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = 12;
@@ -75,8 +74,10 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
     }
 
     private static Instant getTimestamp(byte[] value, int from, int to) {
-        final long aLong = getALong(value, from, to - 4);
-        return Instant.ofEpochSecond(aLong);
+        final long seconds = getALong(value, from, to - 4);
+        final int nanoSeconds = getAnInt(value, to - 4, to);
+
+        return Instant.ofEpochSecond(seconds, nanoSeconds);
     }
 
 }
