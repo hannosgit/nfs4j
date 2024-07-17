@@ -49,6 +49,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.dcache.nfs.v4.client.Fattr4StandardAttributes.STANDARD_ATTRIBUTES;
+
 class NfsClient4Internal {
 
     private final nfs4_prot_NFS4_PROGRAM_Client _nfsClient;
@@ -350,7 +352,7 @@ class NfsClient4Internal {
             COMPOUND4args args = new CompoundBuilder()
                     .withPutfh(path.charAt(0) == '/' ? _rootFh : fh)
                     .withLookup(path)
-                    .withReaddir(cookie, verifier, 16384, 16384)
+                    .withReaddir(cookie, verifier, 16384, 16384, STANDARD_ATTRIBUTES)
                     .withTag("readdir")
                     .build();
 
@@ -363,6 +365,7 @@ class NfsClient4Internal {
             while (dirEntry != null) {
                 cookie = dirEntry.cookie.value;
                 result.add(new String(dirEntry.name.value));
+                System.out.println(Fattr4StandardAttributes.parse(dirEntry.attrs.attr_vals));
                 dirEntry = dirEntry.nextentry;
             }
 

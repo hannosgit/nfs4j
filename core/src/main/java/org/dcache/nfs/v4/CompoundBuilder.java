@@ -155,19 +155,23 @@ public class CompoundBuilder {
         return this;
     }
 
-    public CompoundBuilder withReaddir(long cookie, verifier4 verifier, int dirCount, int maxcount, int... attrs) {
+    public CompoundBuilder withReaddir(long cookie, verifier4 verifier, int dirCount, int maxcount, bitmap4 bitmap) {
 
         nfs_argop4 op = new nfs_argop4();
         op.opreaddir = new READDIR4args();
         op.opreaddir.cookie = new nfs_cookie4(cookie);
         op.opreaddir.dircount = new count4(dirCount);
         op.opreaddir.maxcount = new count4(maxcount);
-        op.opreaddir.attr_request = attrs.length == 0 ? new bitmap4() : bitmap4.of(attrs);
+        op.opreaddir.attr_request = bitmap;
         op.opreaddir.cookieverf = verifier;
 
         op.argop = nfs_opnum4.OP_READDIR;
         ops.add(op);
         return this;
+    }
+
+    public CompoundBuilder withReaddir(long cookie, verifier4 verifier, int dirCount, int maxcount, int... attrs) {
+        return withReaddir(cookie,verifier,dirCount,maxcount,attrs.length == 0 ? new bitmap4() : new bitmap4(attrs));
     }
 
     public CompoundBuilder withGetfh() {
