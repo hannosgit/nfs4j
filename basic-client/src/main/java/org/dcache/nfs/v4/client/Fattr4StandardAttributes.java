@@ -1,18 +1,20 @@
 package org.dcache.nfs.v4.client;
 
+import com.google.common.base.Charsets;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import org.dcache.nfs.v4.xdr.attrlist4;
 import org.dcache.nfs.v4.xdr.bitmap4;
 
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Arrays;
 
 import static org.dcache.nfs.v4.xdr.nfs4_prot.*;
 
 
-public record Fattr4StandardAttributes(int type, long size, long inode, long mode, long numLinks, long owner,
-                                       long group, long spaceUsed, Instant aTime, Instant cTime, Instant mTime) {
+public record Fattr4StandardAttributes(int type, long size, long inode, long mode, long numLinks, String owner,
+                                       String group, long spaceUsed, Instant aTime, Instant cTime, Instant mTime) {
 
     static final bitmap4 STANDARD_ATTRIBUTES = bitmap4.of(
             FATTR4_TYPE,
@@ -45,12 +47,12 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         byteOffset = 4;
         final int ownerLength = getAnInt(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = ownerLength;
-        byteIndex += byteOffset;
+        final String owner = getUTF8String(value, byteIndex, (byteIndex += byteOffset));
 
         byteOffset = 4;
         final int groupLength = getAnInt(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = groupLength;
-        byteIndex += byteOffset;
+        final String group = getUTF8String(value, byteIndex, (byteIndex += byteOffset));
 
 
         byteOffset = 8;
@@ -62,7 +64,7 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         byteOffset = 12;
         final Instant mTime = getTimestamp(value, byteIndex, (byteIndex += byteOffset));
 
-        return new Fattr4StandardAttributes(type, size, inode, mode, numLinks, 0, 0, spaceUsed, aTime, cTime, mTime);
+        return new Fattr4StandardAttributes(type, size, inode, mode, numLinks, owner, group, spaceUsed, aTime, cTime, mTime);
     }
 
     private static long getALong(byte[] value, int from, int to) {
@@ -78,6 +80,10 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         final int nanoSeconds = getAnInt(value, to - 4, to);
 
         return Instant.ofEpochSecond(seconds, nanoSeconds);
+    }
+
+    private static String getUTF8String(byte[] value, int from, int to) {
+        return new String(value, from, to - from, Charsets.UTF_8);
     }
 
 }
