@@ -11,22 +11,23 @@ import java.util.Arrays;
 
 import static org.dcache.nfs.v4.xdr.nfs4_prot.*;
 
-
 public record Fattr4StandardAttributes(int type, long size, long inode, long mode, long numLinks, String owner,
-                                       String group, long spaceUsed, Instant aTime, Instant cTime, Instant mTime) {
+                                       String group, long spaceUsed, Instant aTime, Instant crTime, Instant cTime, Instant mTime)
+{
 
     static final bitmap4 STANDARD_ATTRIBUTES = bitmap4.of(
-            FATTR4_TYPE,
-            FATTR4_SIZE,
-            FATTR4_FILEID,
-            FATTR4_MODE,
-            FATTR4_NUMLINKS,
-            FATTR4_OWNER,
-            FATTR4_OWNER_GROUP,
-            FATTR4_SPACE_USED,
-            FATTR4_TIME_ACCESS,
-            FATTR4_TIME_METADATA,
-            FATTR4_TIME_MODIFY
+        FATTR4_TYPE,
+        FATTR4_SIZE,
+        FATTR4_FILEID,
+        FATTR4_MODE,
+        FATTR4_NUMLINKS,
+        FATTR4_OWNER,
+        FATTR4_OWNER_GROUP,
+        FATTR4_SPACE_USED,
+        FATTR4_TIME_ACCESS,
+        FATTR4_TIME_CREATE,
+        FATTR4_TIME_METADATA,
+        FATTR4_TIME_MODIFY
     );
 
     static Fattr4StandardAttributes parse(attrlist4 attrlist) {
@@ -61,11 +62,13 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         byteOffset = 12;
         final Instant aTime = getTimestamp(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = 12;
+        final Instant crTime = getTimestamp(value, byteIndex, (byteIndex += byteOffset));
+        byteOffset = 12;
         final Instant cTime = getTimestamp(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = 12;
         final Instant mTime = getTimestamp(value, byteIndex, (byteIndex += byteOffset));
 
-        return new Fattr4StandardAttributes(type, size, inode, mode, numLinks, owner, group, spaceUsed, aTime, cTime, mTime);
+        return new Fattr4StandardAttributes(type, size, inode, mode, numLinks, owner, group, spaceUsed, aTime, crTime, cTime, mTime);
     }
 
     private static long getALong(byte[] value, int from, int to) {
@@ -87,7 +90,7 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         return new String(value, from, to - from, StandardCharsets.UTF_8);
     }
 
-    private static int calculatePadding(int slen){
+    private static int calculatePadding(int slen) {
         return (4 - (slen & 0x03)) & 0x03;
     }
 

@@ -31,8 +31,6 @@ public class Nfs4Client implements AutoCloseable {
     private final NfsClient4Internal nfsClient;
 
     public Nfs4Client(@Nonnull String server, int port, @Nonnull String export) throws IOException {
-        System.out.println("Started the NFS4 Client ....");
-
         HostAndPort hp = HostAndPort.fromParts(server, port)
                 .requireBracketsForIPv6();
 
