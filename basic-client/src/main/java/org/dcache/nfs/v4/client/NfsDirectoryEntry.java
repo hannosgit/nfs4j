@@ -2,6 +2,8 @@ package org.dcache.nfs.v4.client;
 
 import jakarta.annotation.Nonnull;
 
+import static org.dcache.nfs.v4.xdr.nfs_ftype4.NF4DIR;
+
 public record NfsDirectoryEntry(
         @Nonnull String name,
         Fattr4StandardAttributes attributes
@@ -9,7 +11,7 @@ public record NfsDirectoryEntry(
 
 
     public boolean isDirectory() {
-        return (this.attributes.mode() & 0x4000) == (0x4000);
+        return this.attributes.type() == NF4DIR;
     }
 
 }

@@ -1,12 +1,11 @@
 package org.dcache.nfs.v4.client;
 
-import com.google.common.base.Charsets;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import org.dcache.nfs.v4.xdr.attrlist4;
 import org.dcache.nfs.v4.xdr.bitmap4;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 
@@ -50,10 +49,12 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
         final String owner = getUTF8String(value, byteIndex, (byteIndex += byteOffset));
 
         byteOffset = 4;
+        byteIndex += calculatePadding(ownerLength);
         final int groupLength = getAnInt(value, byteIndex, (byteIndex += byteOffset));
         byteOffset = groupLength;
         final String group = getUTF8String(value, byteIndex, (byteIndex += byteOffset));
 
+        byteIndex += calculatePadding(ownerLength);
 
         byteOffset = 8;
         final long spaceUsed = getALong(value, byteIndex, (byteIndex += byteOffset));
@@ -83,7 +84,11 @@ public record Fattr4StandardAttributes(int type, long size, long inode, long mod
     }
 
     private static String getUTF8String(byte[] value, int from, int to) {
-        return new String(value, from, to - from, Charsets.UTF_8);
+        return new String(value, from, to - from, StandardCharsets.UTF_8);
+    }
+
+    private static int calculatePadding(int slen){
+        return (4 - (slen & 0x03)) & 0x03;
     }
 
 }
