@@ -16,9 +16,7 @@ public class Nfs3Client implements AutoCloseable {
 
     private final int mountServerPort;
 
-    private final int nfsdPort;
-
-    private Integer localPort;
+    private final Integer localPort;
 
     private final fhandle3 rootFhandle;
 
@@ -28,7 +26,6 @@ public class Nfs3Client implements AutoCloseable {
 
     public Nfs3Client(@Nonnull String server, @Nonnull String export, int mountServerPort, int nfsdPort, Integer localPort) {
         this.mountServerPort = mountServerPort;
-        this.nfsdPort = nfsdPort;
         this.localPort = localPort;
 
         HostAndPort hp = HostAndPort.fromParts(server, nfsdPort).requireBracketsForIPv6();
@@ -40,7 +37,7 @@ public class Nfs3Client implements AutoCloseable {
                 InetAddress.getLocalHost().getHostName());
             rootFhandle = mount(serverAddress, export, credential);
 
-            oncRpcClient = new OncRpcClient(serverAddress.getAddress(), IpProtocolType.TCP, serverAddress.getPort(), 1020);
+            oncRpcClient = buildOncRpcClient(serverAddress, nfsdPort);
             final RpcTransport transport = oncRpcClient.connect();
             rpcCall = new RpcCall(nfs3_prot.NFS_PROGRAM, 3, credential, transport);
         } catch (IOException e) {
@@ -119,7 +116,7 @@ public class Nfs3Client implements AutoCloseable {
     }
 
     private fhandle3 mount(InetSocketAddress serverAddress, String export, RpcAuth credential) {
-        try (var mountRpcClient = buildOncRpcClient(serverAddress)) {
+        try (var mountRpcClient = buildOncRpcClient(serverAddress, mountServerPort)) {
             RpcTransport transport = mountRpcClient.connect();
 
             var client = new RpcCall(mount_prot.MOUNT_PROGRAM, 3, credential, transport);
@@ -137,11 +134,11 @@ public class Nfs3Client implements AutoCloseable {
         }
     }
 
-    private OncRpcClient buildOncRpcClient(InetSocketAddress serverAddress) {
+    private OncRpcClient buildOncRpcClient(InetSocketAddress serverAddress, int port) {
         if (localPort == null) {
-            return new OncRpcClient(serverAddress.getAddress(), IpProtocolType.TCP, mountServerPort);
+            return new OncRpcClient(serverAddress.getAddress(), IpProtocolType.TCP, port);
         }
-        return new OncRpcClient(serverAddress.getAddress(), IpProtocolType.TCP, mountServerPort, localPort);
+        return new OncRpcClient(serverAddress.getAddress(), IpProtocolType.TCP, port, localPort);
     }
 
 }
