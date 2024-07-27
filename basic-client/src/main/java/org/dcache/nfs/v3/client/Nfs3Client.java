@@ -32,9 +32,9 @@ public class Nfs3Client implements AutoCloseable {
         InetSocketAddress serverAddress = new InetSocketAddress(hp.getHost(), hp.getPort());
         try {
             RpcAuth credential = new RpcAuthTypeUnix(
-                0, 0, new int[] {0},
-                (int) (System.currentTimeMillis() / 1000),
-                InetAddress.getLocalHost().getHostName());
+                    0, 0, new int[]{0},
+                    (int) (System.currentTimeMillis() / 1000),
+                    InetAddress.getLocalHost().getHostName());
             rootFhandle = mount(serverAddress, export, credential);
 
             oncRpcClient = buildOncRpcClient(serverAddress, nfsdPort);
@@ -47,6 +47,55 @@ public class Nfs3Client implements AutoCloseable {
 
     public Nfs3Client(@Nonnull String server, @Nonnull String export) {
         this(server, export, 635, 2049, null);
+    }
+
+    public LOOKUP3resok lookUp(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String fileName) {
+        try {
+            final var args = new LOOKUP3args();
+            final diropargs3 what = new diropargs3();
+            what.name = new filename3(fileName);
+            what.dir = parentDirectoryFileHandle;
+            args.what = what;
+            final var response = new LOOKUP3res();
+
+            rpcCall.call(nfs3_prot.NFSPROC3_LOOKUP_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("lookUp", response.status);
+            }
+            return response.resok;
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
+    }
+
+    public void mkdir(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String directoryName) {
+        try {
+            final var args = new MKDIR3args();
+            final diropargs3 where = new diropargs3();
+            where.name = new filename3(directoryName);
+            where.dir = parentDirectoryFileHandle;
+            args.where = where;
+
+            final sattr3 attributes = new sattr3();
+            attributes.atime = new set_atime();
+            attributes.mtime = new set_mtime();
+            final set_mode3 mode = new set_mode3();
+            mode.set_it = true;
+            mode.mode = new mode3(new uint32(0777));
+            attributes.mode = mode;
+            attributes.size = new set_size3();
+            attributes.gid = new set_gid3();
+            attributes.uid = new set_uid3();
+            args.attributes = attributes;
+
+            final var response = new MKDIR3res();
+            rpcCall.call(nfs3_prot.NFSPROC3_MKDIR_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("mkdir", response.status);
+            }
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
     }
 
     public List<entryplus3> readDirPlus(nfs_fh3 fileHandle) {
@@ -85,10 +134,10 @@ public class Nfs3Client implements AutoCloseable {
         }
     }
 
-    public fattr3 getAttr() {
+    public fattr3 getAttr(nfs_fh3 fileHandle) {
         try {
             final var args = new GETATTR3args();
-            args.object = getRootHandle();
+            args.object = fileHandle;
 
             final var response = new GETATTR3res();
             rpcCall.call(nfs3_prot.NFSPROC3_GETATTR_3, args, response);
