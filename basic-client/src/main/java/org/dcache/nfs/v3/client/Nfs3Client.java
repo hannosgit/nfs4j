@@ -177,6 +177,40 @@ public class Nfs3Client implements AutoCloseable {
         return nfsFh3;
     }
 
+    public CREATE3resok create(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String fileName) {
+        try {
+            final var args = new CREATE3args();
+            final diropargs3 where = new diropargs3();
+            where.name = new filename3(fileName);
+            where.dir = parentDirectoryFileHandle;
+            args.where = where;
+
+            final createhow3 how = new createhow3();
+            how.mode = createmode3.GUARDED;
+            final sattr3 attributes = new sattr3();
+            attributes.atime = new set_atime();
+            attributes.mtime = new set_mtime();
+            final set_mode3 mode = new set_mode3();
+            mode.set_it = true;
+            mode.mode = new mode3(new uint32(0777));
+            attributes.mode = mode;
+            attributes.size = new set_size3();
+            attributes.gid = new set_gid3();
+            attributes.uid = new set_uid3();
+            how.obj_attributes = attributes;
+            args.how = how;
+
+            final var response = new CREATE3res();
+            rpcCall.call(nfs3_prot.NFSPROC3_CREATE_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("create", response.status);
+            }
+            return response.resok;
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
+    }
+
     @Override
     public void close() throws IOException {
         this.oncRpcClient.close();

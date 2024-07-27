@@ -46,6 +46,13 @@ class Nfs3ClientTest {
         }
     }
 
+    @Test
+    void create() throws IOException {
+        try (final Nfs3Client nfs3Client = getNfs3Client()) {
+            assertThatCode(() -> nfs3Client.create(nfs3Client.getRootHandle(), "file.txt")).doesNotThrowAnyException();
+        }
+    }
+
     private static @NotNull Nfs3Client getNfs3Client() {
 //        return new Nfs3Client("localhost", "/data", 9051, 9051, null);
         return new Nfs3Client(CONTAINER.getHost(), CONTAINER.getExport(), CONTAINER.getFirstMappedPort(), CONTAINER.getFirstMappedPort(), null);
