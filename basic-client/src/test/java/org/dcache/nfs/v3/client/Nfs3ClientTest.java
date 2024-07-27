@@ -37,6 +37,15 @@ class Nfs3ClientTest {
         }
     }
 
+    @Test
+    void mkdir_and_rmDir() throws IOException {
+        try (final Nfs3Client nfs3Client = getNfs3Client()) {
+            assertThatCode(() -> nfs3Client.mkdir(nfs3Client.getRootHandle(), "bart1")).doesNotThrowAnyException();
+
+            assertThatCode(() -> nfs3Client.rmDir(nfs3Client.getRootHandle(), "bart1")).doesNotThrowAnyException();
+        }
+    }
+
     private static @NotNull Nfs3Client getNfs3Client() {
 //        return new Nfs3Client("localhost", "/data", 9051, 9051, null);
         return new Nfs3Client(CONTAINER.getHost(), CONTAINER.getExport(), CONTAINER.getFirstMappedPort(), CONTAINER.getFirstMappedPort(), null);

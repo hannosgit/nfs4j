@@ -98,6 +98,24 @@ public class Nfs3Client implements AutoCloseable {
         }
     }
 
+    public void rmDir(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String directoryName){
+        try {
+            final var args = new RMDIR3args();
+            final diropargs3 what = new diropargs3();
+            what.name = new filename3(directoryName);
+            what.dir = parentDirectoryFileHandle;
+            args.object = what;
+
+            final var response = new RMDIR3res();
+            rpcCall.call(nfs3_prot.NFSPROC3_RMDIR_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("rmDir", response.status);
+            }
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
+    }
+
     public List<entryplus3> readDirPlus(nfs_fh3 fileHandle) {
         try {
             final var result = new ArrayList<entryplus3>();
