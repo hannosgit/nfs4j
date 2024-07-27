@@ -230,6 +230,24 @@ public class Nfs3Client implements AutoCloseable {
         }
     }
 
+    public byte[] read(nfs_fh3 fileHandle, long offset, int count) {
+        try {
+            final var args = new READ3args();
+            args.file = fileHandle;
+            args.offset = new offset3(new uint64(offset));
+            args.count = new count3(new uint32(count));
+
+            final var response = new READ3res();
+            rpcCall.call(nfs3_prot.NFSPROC3_READ_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("read", response.status);
+            }
+            return response.resok.data;
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
+    }
+
     @Override
     public void close() throws IOException {
         this.oncRpcClient.close();

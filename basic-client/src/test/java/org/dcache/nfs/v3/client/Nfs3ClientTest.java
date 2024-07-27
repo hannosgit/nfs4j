@@ -67,6 +67,21 @@ class Nfs3ClientTest {
         }
     }
 
+    @Test
+    void create_and_write_and_read() throws IOException {
+        try (final Nfs3Client nfs3Client = getNfs3Client()) {
+
+            assertThatCode(() -> {
+                final CREATE3resok create3resok = nfs3Client.create(nfs3Client.getRootHandle(), "fileWriteRead.txt");
+                final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+                nfs3Client.write(create3resok.obj.handle, data, 0, data.length);
+
+                final byte[] read = nfs3Client.read(create3resok.obj.handle, 0, data.length);
+                assertThat(new String(read, StandardCharsets.UTF_8)).isEqualTo("Hello World");
+            }).doesNotThrowAnyException();
+        }
+    }
+
     private static @NotNull Nfs3Client getNfs3Client() {
 //        return new Nfs3Client("localhost", "/data", 9051, 9051, null);
         return new Nfs3Client(CONTAINER.getHost(), CONTAINER.getExport(), CONTAINER.getFirstMappedPort(), CONTAINER.getFirstMappedPort(), null);
