@@ -1,5 +1,6 @@
 package org.dcache.nfs.v3.client;
 
+import org.dcache.nfs.v3.xdr.CREATE3resok;
 import org.dcache.nfs.v3.xdr.fattr3;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import testutil.NfsServerTestcontainer;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -50,6 +52,18 @@ class Nfs3ClientTest {
     void create() throws IOException {
         try (final Nfs3Client nfs3Client = getNfs3Client()) {
             assertThatCode(() -> nfs3Client.create(nfs3Client.getRootHandle(), "file.txt")).doesNotThrowAnyException();
+        }
+    }
+
+    @Test
+    void create_and_write() throws IOException {
+        try (final Nfs3Client nfs3Client = getNfs3Client()) {
+
+            assertThatCode(() -> {
+                final CREATE3resok create3resok = nfs3Client.create(nfs3Client.getRootHandle(), "fileWrite.txt");
+                final byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
+                nfs3Client.write(create3resok.obj.handle, data, 0, data.length);
+            }).doesNotThrowAnyException();
         }
     }
 

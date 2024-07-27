@@ -98,7 +98,7 @@ public class Nfs3Client implements AutoCloseable {
         }
     }
 
-    public void rmDir(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String directoryName){
+    public void rmDir(@Nonnull nfs_fh3 parentDirectoryFileHandle, @Nonnull String directoryName) {
         try {
             final var args = new RMDIR3args();
             final diropargs3 what = new diropargs3();
@@ -206,6 +206,25 @@ public class Nfs3Client implements AutoCloseable {
                 throw new Nfs3Exception("create", response.status);
             }
             return response.resok;
+        } catch (IOException e) {
+            throw new Nfs3TransportException(e);
+        }
+    }
+
+    public void write(nfs_fh3 fileHandle, byte[] data, long offset, int count) {
+        try {
+            final var args = new WRITE3args();
+            args.file = fileHandle;
+            args.data = data;
+            args.offset = new offset3(new uint64(offset));
+            args.count = new count3(new uint32(count));
+            args.stable = stable_how.FILE_SYNC;
+
+            final var response = new WRITE3res();
+            rpcCall.call(nfs3_prot.NFSPROC3_WRITE_3, args, response);
+            if (response.resok == null) {
+                throw new Nfs3Exception("write", response.status);
+            }
         } catch (IOException e) {
             throw new Nfs3TransportException(e);
         }
