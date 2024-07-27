@@ -1,0 +1,29 @@
+FROM maven:3.9.8-eclipse-temurin-17-focal
+
+RUN apt-get update && apt-get -y install unzip &&  apt-get -y install netcat
+
+RUN curl --request GET -sL --url 'https://github.com/dCache/nfs4j/archive/02a7c555d53199c7d53bc70e16fa1cca0735337d.zip' --output '/tmp/nfs4j.zip'
+
+WORKDIR /tmp
+
+RUN unzip nfs4j.zip -d nfs4j
+
+WORKDIR /tmp/nfs4j/nfs4j-02a7c555d53199c7d53bc70e16fa1cca0735337d
+
+RUN mvn install -DskipTests=true
+
+WORKDIR /tmp/nfs4j/nfs4j-02a7c555d53199c7d53bc70e16fa1cca0735337d/basic-server/target
+
+RUN chmod 777 basic-server-0.26.0-SNAPSHOT-jar-with-dependencies.jar
+
+RUN mkdir shared
+
+RUN chmod 777 shared
+
+COPY exports /tmp/nfs4j/nfs4j-02a7c555d53199c7d53bc70e16fa1cca0735337d/basic-server/target/exports
+
+RUN chmod 777 exports
+
+EXPOSE 9051/tcp
+
+CMD java -jar basic-server-0.26.0-SNAPSHOT-jar-with-dependencies.jar -root shared -exports exports -port 9051 -nfsvers 3 -with-portmap

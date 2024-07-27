@@ -1,27 +1,25 @@
 package testutil;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.InternetProtocol;
+import org.testcontainers.containers.wait.strategy.*;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-public class NfsServerTestcontainer<SELF extends NfsServerTestcontainer<SELF>> extends GenericContainer<SELF> {
+public class NfsServerTestcontainer extends GenericContainer<NfsServerTestcontainer> {
 
-    private final String exportPath;
-
-    public NfsServerTestcontainer(String exportPath) {
-        super(new ImageFromDockerfile("nfs-server:latest",false)
-                .withFileFromClasspath("Dockerfile", "Dockerfile")
-                .withFileFromClasspath("start.sh", "start.sh")
+    public NfsServerTestcontainer() {
+        super(new ImageFromDockerfile("nfsserver-testcontainer", false)
+                .withFileFromClasspath("Dockerfile", "testcontainer/Dockerfile")
+                .withFileFromClasspath("exports", "testcontainer/exports")
+                .withFileFromClasspath("basic-server.jar", "testcontainer/basic-server.jar")
+                .withFileFromString("folder/someFile.txt", "hello")
         );
-        this.withExposedPorts(2049)
-                .withEnv("GANESHA_EXPORT_ID", "1")
-                .withEnv("GANESHA_EXPORT", exportPath)
-                .withEnv("GANESHA_PSEUDO_PATH", exportPath)
-                .withEnv("GANESHA_ACCESS", "*")
-                .withEnv("GANESHA_ROOT_ACCESS", "*");
-        this.exportPath = exportPath;
+        this.waitingFor(Wait.forLogMessage(".*NfsServerV3.*\\n",1));
+        this.withExposedPorts(9051);
     }
 
-    public String getExportPath() {
-        return exportPath;
+    public String getExport(){
+        return "/data";
     }
+
 }
