@@ -8,15 +8,22 @@
       <version>0.27.0-SNAPSHOT</version>
     </parent>
 
-    <name>Distributed lock manager</name>
-    <groupId>org.dcache</groupId>
-    <artifactId>nfs4j-dlm</artifactId>
+    <artifactId>rquota</artifactId>
     <packaging>jar</packaging>
+    <description>Remote quota protocol implementation</description>
 
+    <!--
+        EXTERNAL DEPENDENCIES
+    -->
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -26,8 +33,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -37,13 +44,6 @@
             <groupId>org.dcache</groupId>
             <artifactId>nfs4j-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dcache</groupId>
-            <artifactId>nfs4j-core</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
